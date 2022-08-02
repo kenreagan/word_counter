@@ -1,0 +1,51 @@
+use std::fs::File;
+use std::io::{ErrorKind, Read};
+use std::collections::HashMap;
+
+
+
+// #[allow(dead_code)]
+// fn largest<T>(item: &[T]) -> T{
+//     let mut largest: T = item[0]; 
+//     for &values in item {
+//         if values > largest{
+//             largest = values
+//         }
+//     }
+//     largest
+// }
+
+fn main() {
+    let file = File::open("main.txt");
+    let mut file = match file {
+        Ok(file) => file,
+        Err(error) => match error.kind() {
+            ErrorKind::NotFound => match File::create("main.txt"){
+                Ok(fc) => fc,
+                Err(error) => panic!("Problem creating file, {:?}", error),
+            },
+            other_error => {
+                panic!("error found {:?}", other_error)
+            }
+        }
+    };
+
+    let mut word_contents: String = String::new();
+
+    file.read_to_string(&mut word_contents).unwrap_or_else(|some_error|{
+        panic!("{}", some_error)
+    });
+
+
+    let mut word_counter = HashMap::new();
+
+
+    for words in word_contents.split_whitespace(){
+        let counter = word_counter.entry(words).or_insert(0);
+        *counter += 1
+    }
+
+    for (key, value) in word_counter{
+        println!("{}: {}", key, value)
+    }
+}
